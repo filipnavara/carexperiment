@@ -14,10 +14,10 @@ namespace AppleTools.AssetCatalog
             // Tag
             var tag = stream.ReadU32(true); // META
 
-            ThinningArguments = stream.ReadStringUTF8NullTerminated(256);
-            DeploymentPlatformVersion = stream.ReadStringUTF8NullTerminated(256);
-            DeploymentPlatform = stream.ReadStringUTF8NullTerminated(256);
-            AuthoringTool = stream.ReadStringUTF8NullTerminated(256);
+            ThinningArguments = stream.ReadUtf8FixedWidthString(256);
+            DeploymentPlatformVersion = stream.ReadUtf8FixedWidthString(256);
+            DeploymentPlatform = stream.ReadUtf8FixedWidthString(256);
+            AuthoringTool = stream.ReadUtf8FixedWidthString(256);
         }
 
         public string ThinningArguments { get; set; }

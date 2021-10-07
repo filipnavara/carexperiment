@@ -3,7 +3,7 @@ using AppleTools.AssetCatalog;
 using AppleTools.Bom;
 using LibObjectFile;
 
-if (BomFile.TryRead(File.OpenRead(@"D:\app1\Assets.car"), out var bomFile, out var diagnosticBag))
+if (BomFile.TryRead(File.OpenRead(@"/Applications/Pages.app/Contents/Resources/Assets.car"), out var bomFile, out var diagnosticBag))
 {
     RenditionKeyFormat renditionKeyFormat;
 

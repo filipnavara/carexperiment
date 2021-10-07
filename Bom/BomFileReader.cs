@@ -86,7 +86,7 @@ namespace AppleTools.Bom
             {
                 uint bomVarIndex = ReadU32();
                 byte bomVarNameLength = ReadU8();
-                string bomVarName = ReadStringUTF8NullTerminated(bomVarNameLength);
+                string bomVarName = Stream.ReadUtf8FixedWidthString(bomVarNameLength);
                 BomFile.AddNamedBlock(new BomNamedBlock(bomVarName, bomVarIndex));
             }
         }

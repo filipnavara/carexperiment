@@ -26,9 +26,8 @@ namespace AppleTools.Bom
             uint count = treeStream.ReadU32(false);
             byte keyFlags = treeStream.ReadU8(); // only 0 is supported
 
-            // The structure is a B-Tree but leaf pages are also linked
-            // together by back/forward pointers. We locate the first
-            // leaf page and then iterate through the forward pointers.
+            // The structure is a B+Tree. We locate the first leaf page and then
+            // iterate through the forward pointers.
             this.bomFile = bomFile;
 
             if (rootIndex != 0)

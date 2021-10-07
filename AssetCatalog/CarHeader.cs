@@ -18,8 +18,8 @@ namespace AppleTools.AssetCatalog
             StorageVersion = stream.ReadU32(true);
             StorageTimestamp = DateTimeOffset.FromUnixTimeSeconds(stream.ReadU32(true));
             RenditionCount = stream.ReadU32(true);
-            MainVersion = stream.ReadStringUTF8NullTerminated(128);
-            Version = stream.ReadStringUTF8NullTerminated(256);
+            MainVersion = stream.ReadUtf8FixedWidthString(128);
+            Version = stream.ReadUtf8FixedWidthString(256);
             Span<byte> uuidBuffer = stackalloc byte[16];
             stream.Read(uuidBuffer); // FIXME: assert read size
             Uuid = new Guid(uuidBuffer);

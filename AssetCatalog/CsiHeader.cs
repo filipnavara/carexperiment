@@ -23,7 +23,7 @@ namespace AppleTools.AssetCatalog
             ColorSpace = stream.ReadU32(true);
             ModificationTime = DateTimeOffset.FromUnixTimeSeconds(stream.ReadU32(true));
             Layout = (RenditionLayoutType)stream.ReadU32(true);
-            Name = stream.ReadStringUTF8NullTerminated(128);
+            Name = stream.ReadUtf8FixedWidthString(128);
         }
 
         public uint Version { get; set; }
