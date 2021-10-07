@@ -1,9 +1,10 @@
 ﻿
+using AppleTools;
 using AppleTools.AssetCatalog;
 using AppleTools.Bom;
 using LibObjectFile;
 
-if (BomFile.TryRead(File.OpenRead(@"/Applications/Pages.app/Contents/Resources/Assets.car"), out var bomFile, out var diagnosticBag))
+if (BomFile.TryRead(File.OpenRead(/*@"/Applications/Pages.app/Contents/Resources/Assets.car"*/@"/Users/filipnavara/Downloads/gc/MailClient.Mobile.iOS.app/Assets.car"), out var bomFile, out var diagnosticBag))
 {
     RenditionKeyFormat renditionKeyFormat;
 
@@ -17,6 +18,33 @@ if (BomFile.TryRead(File.OpenRead(@"/Applications/Pages.app/Contents/Resources/A
     {
         var extendedMetadata = new CarExtendedMetadata(extendedMetadataBlock.Stream);
         Console.WriteLine(extendedMetadata.ToString());
+    }
+
+    if (bomFile.TryGetTreeByName("FACETKEYS", out var facetKeysTreeReader))
+    {
+        Console.WriteLine("FACETKEYS:");
+        foreach (var facetKeyValue in facetKeysTreeReader)
+        {
+            var keyBlock = facetKeyValue.Key;
+            var valueBlock = facetKeyValue.Value;
+            keyBlock.Stream.Position = 0;
+            Console.WriteLine("  " + keyBlock.Stream.ReadUtf8FixedWidthString((uint)keyBlock.Stream.Length));
+            valueBlock.Stream.Position = 0;
+            var hotSpotX = valueBlock.Stream.ReadU16(true);
+            var hotSpotY = valueBlock.Stream.ReadU16(true);
+            var numberOfAttributes = valueBlock.Stream.ReadU16(true);
+            for (int i = 0; i < numberOfAttributes; i++)
+            {
+                var name = (RenditionAttributeType)valueBlock.Stream.ReadU16(true);
+                var value = valueBlock.Stream.ReadU16(true);
+                Console.WriteLine($"    {name}: {value:X}");
+            }
+        }
+        Console.WriteLine();
+    }
+
+    if (bomFile.TryGetTreeByName("BITMAPKEYS", out var bitmapKeysTreeReader))
+    {
     }
 
     if (bomFile.TryGetBlockByName("KEYFORMAT", out var keyFormatBlock))

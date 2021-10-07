@@ -14,6 +14,11 @@ namespace AppleTools.Bom
             Stream = reader.ReadAsStream(length);
         }
 
+        internal BomBlock(Stream stream)
+        {
+            Stream = stream;
+        }
+
         public Stream Stream { get; private set; }
     }
 }

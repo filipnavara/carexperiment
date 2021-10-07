@@ -12,6 +12,7 @@ namespace AppleTools.Bom
     {
         private BomFile bomFile;
         private BomTreePage? currentPage;
+        private bool inlineKeys;
 
         public BomTreeReader(BomFile bomFile, Stream treeStream)
         {
@@ -24,7 +25,11 @@ namespace AppleTools.Bom
             uint rootIndex = treeStream.ReadU32(false);
             uint blockSize = treeStream.ReadU32(false);
             uint count = treeStream.ReadU32(false);
-            byte keyFlags = treeStream.ReadU8(); // only 0 is supported
+            byte keyFlags = treeStream.ReadU8();
+            uint keySize = treeStream.ReadU32(false);
+            uint unknown = treeStream.ReadU32(false);
+
+            this.inlineKeys = keyFlags != 0;
 
             // The structure is a B+Tree. We locate the first leaf page and then
             // iterate through the forward pointers.
@@ -48,7 +53,18 @@ namespace AppleTools.Bom
                 for (int i = 0; i < currentPage.KeyIndices.Length; i++)
                 {
                     var valueBlock = bomFile.Blocks[(int)currentPage.ValueIndices[i]];
-                    var keyBlock = bomFile.Blocks[(int)currentPage.KeyIndices[i]];
+                    BomBlock keyBlock;
+                    if (inlineKeys)
+                    {
+                        var tempStream = new MemoryStream();
+                        tempStream.WriteU32(true, currentPage.KeyIndices[i]);
+                        tempStream.Position = 0;
+                        keyBlock = new BomBlock(tempStream);
+                    }
+                    else
+                    {
+                        keyBlock = bomFile.Blocks[(int)currentPage.KeyIndices[i]];
+                    }
                     yield return new KeyValuePair<BomBlock, BomBlock>(keyBlock, valueBlock);
                 }
 
