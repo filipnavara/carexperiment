@@ -43,10 +43,6 @@ if (BomFile.TryRead(File.OpenRead(/*@"/Applications/Pages.app/Contents/Resources
         Console.WriteLine();
     }
 
-    if (bomFile.TryGetTreeByName("BITMAPKEYS", out var bitmapKeysTreeReader))
-    {
-    }
-
     if (bomFile.TryGetBlockByName("KEYFORMAT", out var keyFormatBlock))
     {
         renditionKeyFormat = new RenditionKeyFormat(keyFormatBlock.Stream);
@@ -67,6 +63,37 @@ if (BomFile.TryRead(File.OpenRead(/*@"/Applications/Pages.app/Contents/Resources
                 Console.WriteLine("  Value: ");
                 var csiHeader = new CsiHeader(renditionKeyValue.Value.Stream);
                 Console.Write(String.Join("\n", csiHeader.ToString().Split('\n').Select(l => "    " + l)));
+                Console.WriteLine();
+            }
+        }
+
+        // Bitmap keys map a name identifier into a set of possible values for the rendition keys
+        if (bomFile.TryGetTreeByName("BITMAPKEYS", out var bitmapKeysTreeReader))
+        {
+            Console.WriteLine("BITMAPKEYS:");
+            foreach (var bitmapKeyValue in bitmapKeysTreeReader)
+            {
+                var keyStream = bitmapKeyValue.Key.Stream;
+                Console.WriteLine("  Name Identifier: " + keyStream.ReadU32(true));
+                Console.WriteLine("  Value: ");
+                var valueStream = bitmapKeyValue.Value.Stream;
+                uint version = valueStream.ReadU32(true); // 1
+                uint unknown = valueStream.ReadU32(true); // 0?
+                uint bitmapSize = valueStream.ReadU32(true);
+                uint elementCount = valueStream.ReadU32(true); // elementCount * 4 + 4 == bitmapSize
+                for (int i = 0; i < renditionKeyFormat.AttributeTypes.Length; i++)
+                {
+                    uint valueMask = valueStream.ReadU32(true);
+                    Console.Write($"    {renditionKeyFormat.AttributeTypes[i]}: ");
+                    if (valueMask == 0xffffffffu)
+                    {
+                        Console.WriteLine("<all>");
+                    }
+                    else
+                    {
+                        Console.WriteLine(String.Join(", ", Enumerable.Range(0, 32).Where(b => (valueMask & (uint)(1 << b)) != 0)));
+                    }
+                }
                 Console.WriteLine();
             }
         }
