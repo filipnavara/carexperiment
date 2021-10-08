@@ -6,16 +6,20 @@ using LibObjectFile;
 
 if (BomFile.TryRead(File.OpenRead(/*@"/Applications/Pages.app/Contents/Resources/Assets.car"*/@"/Users/filipnavara/Downloads/gc/MailClient.Mobile.iOS.app/Assets.car"), out var bomFile, out var diagnosticBag))
 {
+    //bomFile.Write(File.OpenWrite("tst.bom"));
+
     RenditionKeyFormat renditionKeyFormat;
 
     if (bomFile.TryGetBlockByName("CARHEADER", out var carHeaderBlock))
     {
+        carHeaderBlock.Stream.Position = 0;
         var carHeader = new CarHeader(carHeaderBlock.Stream);
         Console.WriteLine(carHeader.ToString());
     }
 
     if (bomFile.TryGetBlockByName("EXTENDED_METADATA", out var extendedMetadataBlock))
     {
+        extendedMetadataBlock.Stream.Position = 0;
         var extendedMetadata = new CarExtendedMetadata(extendedMetadataBlock.Stream);
         Console.WriteLine(extendedMetadata.ToString());
     }
@@ -45,6 +49,7 @@ if (BomFile.TryRead(File.OpenRead(/*@"/Applications/Pages.app/Contents/Resources
 
     if (bomFile.TryGetBlockByName("KEYFORMAT", out var keyFormatBlock))
     {
+        keyFormatBlock.Stream.Position = 0;
         renditionKeyFormat = new RenditionKeyFormat(keyFormatBlock.Stream);
         Console.WriteLine(renditionKeyFormat.ToString());
 
@@ -54,6 +59,7 @@ if (BomFile.TryRead(File.OpenRead(/*@"/Applications/Pages.app/Contents/Resources
             foreach (var renditionKeyValue in renditionsTreeReader)
             {
                 var keyStream = renditionKeyValue.Key.Stream;
+                keyStream.Position = 0;
                 Console.WriteLine("  Key: ");
                 for (int i = 0; i < renditionKeyFormat.AttributeTypes.Length; i++)
                 {
@@ -61,6 +67,7 @@ if (BomFile.TryRead(File.OpenRead(/*@"/Applications/Pages.app/Contents/Resources
                     Console.WriteLine($"    {renditionKeyFormat.AttributeTypes[i]}: {key:X}");
                 }
                 Console.WriteLine("  Value: ");
+                renditionKeyValue.Value.Stream.Position = 0;
                 var csiHeader = new CsiHeader(renditionKeyValue.Value.Stream);
                 Console.Write(String.Join("\n", csiHeader.ToString().Split('\n').Select(l => "    " + l)));
                 Console.WriteLine();
@@ -74,9 +81,11 @@ if (BomFile.TryRead(File.OpenRead(/*@"/Applications/Pages.app/Contents/Resources
             foreach (var bitmapKeyValue in bitmapKeysTreeReader)
             {
                 var keyStream = bitmapKeyValue.Key.Stream;
-                Console.WriteLine("  Name Identifier: " + keyStream.ReadU32(true));
+                keyStream.Position = 0;
+                Console.WriteLine($"  Name Identifier: {keyStream.ReadU32(true):X}");
                 Console.WriteLine("  Value: ");
                 var valueStream = bitmapKeyValue.Value.Stream;
+                valueStream.Position = 0;
                 uint version = valueStream.ReadU32(true); // 1
                 uint unknown = valueStream.ReadU32(true); // 0?
                 uint bitmapSize = valueStream.ReadU32(true);

@@ -86,5 +86,10 @@ namespace AppleTools.Bom
 
             return !reader.Diagnostics.HasErrors;
         }
+
+        public void Write(Stream stream)
+        {
+            new BomFileWriter(this, stream).Write();
+        }
     }
 }
