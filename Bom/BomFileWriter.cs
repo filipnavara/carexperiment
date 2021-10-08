@@ -20,31 +20,6 @@ namespace AppleTools.Bom
 
         public override bool IsReadOnly => false;
 
-        internal static bool IsBom(Stream stream, DiagnosticBag diagnostics)
-        {
-            Span<byte> magic = stackalloc byte[BomFile.Magic.Length];
-            int magicLength = stream.Read(magic);
-            if (magicLength != magic.Length)
-            {
-                if (diagnostics != null)
-                {
-                    diagnostics.Error((DiagnosticId)BomDiagnosticId.BOM_ERR_InvalidMagicLength, $"Invalid length {magicLength} while trying to read !<arch> from stream while expecting at least {magic.Length} bytes");
-                }
-                return false;
-            }
-
-            if (!magic.SequenceEqual(BomFile.Magic))
-            {
-                if (diagnostics != null)
-                {
-                    diagnostics.Error((DiagnosticId)BomDiagnosticId.BOM_ERR_MagicNotFound, $"Magic !<arch>\\n not found");
-                }
-                return false;
-            }
-
-            return true;
-        }
-
         internal void Write()
         {
             uint bomStoreVarsOffset = 0x200; // Header size
