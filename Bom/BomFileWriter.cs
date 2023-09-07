@@ -36,13 +36,14 @@ namespace AppleTools.Bom
                 bomStoreVarsLength += 5 + (uint)Encoding.UTF8.GetByteCount(namedBlock.Name);
             }
 
-            uint indexEntryCount = ((uint)BomFile.Blocks.Count + 0xffu) & ~0xffu;
+            uint indexEntryCount = (((uint)BomFile.Blocks.Count + 0xffu) & ~0xffu);
             uint bomStoreIndexOffset = (bomStoreVarsOffset + bomStoreVarsLength + 0xfu) & ~0xfu;
-            uint bomStoreIndexLength = indexEntryCount * 8 + 4;
+            uint bomStoreIndexLength = indexEntryCount * 8 + 4 + 20 /* free list size */;
 
+            Stream.SetLength(0);
             Stream.Write(BomFile.Magic);
             WriteU32(1); // Version
-            WriteU32((uint)BomFile.Blocks.Count - 1);
+            WriteU32((uint)(BomFile.Blocks.Count - 1));
             WriteU32(bomStoreIndexOffset);
             WriteU32(bomStoreIndexLength);
             WriteU32(bomStoreVarsOffset);
@@ -88,6 +89,13 @@ namespace AppleTools.Bom
                 WriteU32(0);
                 WriteU32(0);
             }
+
+            // Free list (count + two empty entries)
+            WriteU32(0);
+            WriteU32(0);
+            WriteU32(0);
+            WriteU32(0);
+            WriteU32(0);
         }
     }
 }

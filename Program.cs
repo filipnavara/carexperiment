@@ -4,9 +4,59 @@ using AppleTools.AssetCatalog;
 using AppleTools.Bom;
 using LibObjectFile;
 
-if (BomFile.TryRead(File.OpenRead(/*@"/Applications/Pages.app/Contents/Resources/Assets.car"*/@"/Users/filipnavara/Downloads/gc/MailClient.Mobile.iOS.app/Assets.car"), out var bomFile, out var diagnosticBag))
+if (BomFile.TryRead(File.OpenRead(@"/Applications/Pages.app/Contents/Resources/Assets.car"/*@"/Users/filipnavara/Downloads/gc/MailClient.Mobile.iOS.app/Assets.car"*/), out var bomFile, out var diagnosticBag))
 {
-    //bomFile.Write(File.OpenWrite("tst.bom"));
+    using (var outFile = File.OpenWrite("tst.bom"))
+    {
+        var bomCopy = new BomFile();
+        if (bomFile.TryGetBlockByName("CARHEADER", out var carHeaderBlock1))
+            bomCopy.AddNamedBlock("CARHEADER", carHeaderBlock1);
+        if (bomFile.TryGetTreeByName("RENDITIONS", out var renditionsTreeReader1))
+        {
+            var builder = new BomTreeBuilder(bomCopy, BomTreeBuilder.DefaultKeyComparer);
+            foreach (var kv in renditionsTreeReader1)
+                builder.Add(kv.Key, kv.Value);
+            bomCopy.AddNamedBlock(new BomNamedBlock("RENDITIONS", builder.Build()));
+        }
+        if (bomFile.TryGetTreeByName("FACETKEYS", out var facetKeysTreeReader1))
+        {
+            var builder = new BomTreeBuilder(bomCopy, BomTreeBuilder.DefaultKeyComparer);
+            foreach (var kv in facetKeysTreeReader1)
+                builder.Add(kv.Key, kv.Value);
+            bomCopy.AddNamedBlock(new BomNamedBlock("FACETKEYS", builder.Build()));
+        }
+        if (bomFile.TryGetTreeByName("APPEARANCEKEYS", out var appearanceKeysTreeReader1))
+        {
+            var builder = new BomTreeBuilder(bomCopy, BomTreeBuilder.DefaultKeyComparer);
+            foreach (var kv in appearanceKeysTreeReader1)
+                builder.Add(kv.Key, kv.Value);
+            bomCopy.AddNamedBlock(new BomNamedBlock("APPEARANCEKEYS", builder.Build()));
+        }
+        if (bomFile.TryGetTreeByName("LOCALIZATIONKEYS", out var localizationKeysTreeReader1))
+        {
+            var builder = new BomTreeBuilder(bomCopy, BomTreeBuilder.DefaultKeyComparer);
+            foreach (var kv in localizationKeysTreeReader1)
+                builder.Add(kv.Key, kv.Value);
+            bomCopy.AddNamedBlock(new BomNamedBlock("LOCALIZATIONKEYS", builder.Build()));
+        }
+        if (bomFile.TryGetBlockByName("KEYFORMAT", out var keyFormat1))
+            bomCopy.AddNamedBlock("KEYFORMAT", keyFormat1);
+        if (bomFile.TryGetBlockByName("EXTENDED_METADATA", out var extendedMetadataBlock1))
+            bomCopy.AddNamedBlock("EXTENDED_METADATA", extendedMetadataBlock1);
+        if (bomFile.TryGetTreeByName("BITMAPKEYS", out var bitmapKeysTreeReader1))
+        {
+            var builder = new BomTreeBuilder(bomCopy, BomTreeBuilder.DefaultKeyComparer, 1024);
+            foreach (var kv in bitmapKeysTreeReader1)
+                builder.Add(kv.Key, kv.Value);
+            bomCopy.AddNamedBlock(new BomNamedBlock("BITMAPKEYS", builder.Build()));
+        }
+        bomCopy.Write(outFile);
+
+        //bomFile = bomCopy;
+        //bomFile.Write(outFile);
+    }
+
+    BomFile.TryRead(File.OpenRead(@"tst.bom"), out bomFile, out diagnosticBag);
 
     RenditionKeyFormat renditionKeyFormat;
 

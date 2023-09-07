@@ -30,20 +30,26 @@ namespace AppleTools.Bom
         {
             _blocks = new List<BomBlock>();
             _namedBlocks = new List<BomNamedBlock>();
+            // Add dummy zero block that covers the header
+            _blocks.Add(new BomBlock(Stream.Null));
         }
 
         public IReadOnlyList<BomBlock> Blocks => _blocks;
         public IReadOnlyList<BomNamedBlock> NamedBlocks => _namedBlocks;
 
-        public void AddBlock(BomBlock block)
+        public uint AddBlock(BomBlock block)
         {
             _blocks.Add(block);
+            return (uint)(_blocks.Count - 1);
         }
 
         public void AddNamedBlock(BomNamedBlock namedBlock)
         {
             _namedBlocks.Add(namedBlock);
         }
+
+        public void AddNamedBlock(string name, BomBlock block)
+            => AddNamedBlock(new BomNamedBlock(name, AddBlock(block)));
 
         public bool TryGetBlockByName(string name, [NotNullWhen(true)] out BomBlock? bomBlock)
         {

@@ -20,5 +20,11 @@ namespace AppleTools.Bom
         }
 
         public Stream Stream { get; private set; }
+
+        public void ReadInto(Span<byte> buffer)
+        {
+            Stream.Position = 0;
+            Stream.ReadExactly(buffer);
+        }
     }
 }

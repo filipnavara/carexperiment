@@ -68,8 +68,11 @@ namespace AppleTools.Bom
             // Read block index
             this.Offset = bomStoreIndexOffset;
             var bomIndexCount = ReadU32();
-            var bomIndex = new (uint Offset, uint Length)[bomStoreNumberOfBlocks + 1];
-            for (int i = 0; i < bomIndexCount && i <= bomStoreNumberOfBlocks; i++)
+            var bomIndex = new (uint Offset, uint Length)[bomStoreNumberOfBlocks];
+            // NOTE: Skip the first index that covers the header block (always zero)
+            _ = ReadU32();
+            _ = ReadU32();
+            for (int i = 0; i < bomIndexCount && i < bomStoreNumberOfBlocks; i++)
             {
                 bomIndex[i] = (ReadU32(), ReadU32());
             }
